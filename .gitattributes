@@ -1,0 +1,3 @@
+# Exclude everything except "handflow/lib"
+* linguist-vendored
+!handflow/lib/*
