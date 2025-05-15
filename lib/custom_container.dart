@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+
 class CustomContainer extends StatefulWidget {
   final String deviceId;
   final Function(bool) toggleLoading; // Function to toggle loading
@@ -77,6 +78,7 @@ class _CustomContainerState extends State<CustomContainer> {
         "level": level,
       });
     }
+
     await Future.delayed(const Duration(seconds: 1));
     widget.toggleLoading(false); // Hide loader
   }
@@ -109,10 +111,7 @@ class _CustomContainerState extends State<CustomContainer> {
             color: isDeviceOn == "on" ? Colors.amber : Colors.grey,
           ),
           SizedBox(height: 8),
-          Text(
-            widget.deviceId,
-            style: TextStyle(fontSize: 16),
-          ),
+          Text(widget.deviceId, style: TextStyle(fontSize: 16)),
           SizedBox(height: 2),
           Transform.scale(
             scale: 0.8,

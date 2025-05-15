@@ -6,7 +6,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       leading: Padding(
         padding: const EdgeInsets.all(8.0), // Add some padding if needed
-        child: Image.asset('assets/logo.png'), // Path to the logo image
+        child: Image.asset('assets/app_icon.png'), // Path to the logo image
       ),
       elevation: 10,
       shadowColor: Colors.black.withOpacity(0.3),

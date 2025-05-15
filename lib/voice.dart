@@ -7,7 +7,6 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 class VoiceFeature extends StatefulWidget {
-  
   @override
   _VoiceFeatureState createState() => _VoiceFeatureState();
 }
@@ -29,7 +28,7 @@ class _VoiceFeatureState extends State<VoiceFeature> {
     'one': '1',
     'two': '2',
     'to': '2',
-    'tu' : '2',
+    'tu': '2',
     'three': '3',
     'four': '4',
     'for': '4',
@@ -60,6 +59,15 @@ class _VoiceFeatureState extends State<VoiceFeature> {
   }
 
   Future<void> _startListening() async {
+    if (!_speechEnabled) {
+      print("Speech recognition is not enabled.");
+      await _initSpeech(); // Try to reinitialize
+      if (!_speechEnabled) {
+        _speak("Speech recognition is not available.");
+        return;
+      }
+    }
+
     await _speechToText.listen(onResult: _onSpeechResult);
     setState(() {});
   }
@@ -100,19 +108,21 @@ class _VoiceFeatureState extends State<VoiceFeature> {
     String device = "none";
     if (combinedString.contains("device 1")) {
       device = "device_1";
-    }
-    else if (combinedString.contains("fan")) {
+    } else if (combinedString.contains("fan")) {
       device = "device_fan";
-    }
-    else {
+    } else {
       print("no device is selected");
     }
 
     int? level;
     if (combinedString.contains("speed")) {
-      level = int.tryParse(RegExp(r'speed\s*(\d+)').firstMatch(combinedString)?.group(1) ?? '');
+      level = int.tryParse(
+        RegExp(r'speed\s*(\d+)').firstMatch(combinedString)?.group(1) ?? '',
+      );
     } else if (combinedString.contains("level")) {
-      level = int.tryParse(RegExp(r'level\s*(\d+)').firstMatch(combinedString)?.group(1) ?? '');
+      level = int.tryParse(
+        RegExp(r'level\s*(\d+)').firstMatch(combinedString)?.group(1) ?? '',
+      );
     }
 
     // Regex to extract device, level, and turn
@@ -125,68 +135,67 @@ class _VoiceFeatureState extends State<VoiceFeature> {
     print(isDeviceOn);
 
     // Update Firebase
-  //   if (device != null) {
-  //     String devicePath = 'Device $device';
-  //     try {
-  //       final snapshot = await _database.child(devicePath).get();
-  //       if (snapshot.exists) {
-  //         await _database.child(devicePath).child(isOnKey).set(isDeviceOn);
-  //         final snapshot1 = await _database.child(devicePath).child("level").get();
-  //         if (snapshot1.exists) {
-  //           if (isDeviceOn){
-  //             await _database.child(devicePath).child(levelKey).set(level);
-  //           }
-  //           if (isDeviceOn){
-              // _speak("Device $device is turned on with level $level");
-  //           }
-  //           else {
-              // _speak("Device $device is turned off");
-  //           }
-  //         } else {
-  //           print("Sorry, the level is not provided.");
-  //           _speak("Device $device is turned ${isDeviceOn ? "on" : "off"}");
-  //         }
-  //       } else {
-  //         print("Sorry, that device is not connected to our system.");
-  //       }
-  //     } catch (e) {
-  //       print("Error updating Firebase: $e");
-  //     }
-  //   } else {
-  //     print('Could not parse device or level from the speech input.');
-  //   }
-  // }
+    //   if (device != null) {
+    //     String devicePath = 'Device $device';
+    //     try {
+    //       final snapshot = await _database.child(devicePath).get();
+    //       if (snapshot.exists) {
+    //         await _database.child(devicePath).child(isOnKey).set(isDeviceOn);
+    //         final snapshot1 = await _database.child(devicePath).child("level").get();
+    //         if (snapshot1.exists) {
+    //           if (isDeviceOn){
+    //             await _database.child(devicePath).child(levelKey).set(level);
+    //           }
+    //           if (isDeviceOn){
+    // _speak("Device $device is turned on with level $level");
+    //           }
+    //           else {
+    // _speak("Device $device is turned off");
+    //           }
+    //         } else {
+    //           print("Sorry, the level is not provided.");
+    //           _speak("Device $device is turned ${isDeviceOn ? "on" : "off"}");
+    //         }
+    //       } else {
+    //         print("Sorry, that device is not connected to our system.");
+    //       }
+    //     } catch (e) {
+    //       print("Error updating Firebase: $e");
+    //     }
+    //   } else {
+    //     print('Could not parse device or level from the speech input.');
+    //   }
+    // }
     if (device == "device_1") {
       if (isDeviceOn) {
         await _database.child("gestureData").child(deviceKey).set(device);
         await _database.child("gestureData").child(isOnKey).set("on");
         _speak("Device 1 is turned on");
-      }
-      else {
+      } else {
         await _database.child("gestureData").child(deviceKey).set(device);
         await _database.child("gestureData").child(isOnKey).set("off");
         _speak("Device 1 is turned off");
       }
-    }
-    else if (device != "none") {
+    } else if (device != "none") {
       if (level != null) {
         if (isDeviceOn) {
           await _database.child("gestureData").child(deviceKey).set(device);
           await _database.child("gestureData").child(isOnKey).set("on");
-          await _database.child("gestureData").child(levelKey).set(level.toString());
+          await _database
+              .child("gestureData")
+              .child(levelKey)
+              .set(level.toString());
           _speak("Device fan is turned on with level $level");
-        }
-        else {
+        } else {
           await _database.child("gestureData").child(deviceKey).set(device);
           await _database.child("gestureData").child(isOnKey).set("off");
           await _database.child("gestureData").child(levelKey).set("0");
           _speak("Device fan is turned off");
         }
-      }
-      else {
+      } else {
         // if (isDeviceOn) {
         //   _speak("Device $device is turned on with level $level");
-        //   _speak("I didn't get what level you want to change. Try Again !!");     
+        //   _speak("I didn't get what level you want to change. Try Again !!");
         // }
         // else {
         //   _speak("Device $device is turned off with level $level");
@@ -199,22 +208,18 @@ class _VoiceFeatureState extends State<VoiceFeature> {
           }
           if (device == "device_1") {
             _speak("Device 1 is turned off");
-          }
-          else if (device == "device_fan") {
+          } else if (device == "device_fan") {
             _speak("Fan is turned off");
           }
-        }
-        else {
+        } else {
           _speak("I didn't get what level you want to change. Try Again !!");
         }
         print(isDeviceOn);
       }
-    }
-    else {
+    } else {
       _speak("I didn't get what you just said. Try Again !!");
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -236,17 +241,20 @@ class _VoiceFeatureState extends State<VoiceFeature> {
               _speechToText.isListening
                   ? _lastWords
                   : _speechEnabled
-                      ? 'Tap the microphone to start listening...'
-                      : 'Speech not available',
+                  ? 'Tap the microphone to start listening...'
+                  : 'Speech not available',
               style: const TextStyle(fontSize: 18.0),
             ),
           ),
           const SizedBox(height: 20),
           // Microphone button
           FloatingActionButton(
-            onPressed: _speechToText.isNotListening ? _startListening : _stopListening,
+            onPressed:
+                _speechToText.isNotListening ? _startListening : _stopListening,
             tooltip: 'Listen',
-            child: Icon(_speechToText.isNotListening ? Icons.mic : Icons.mic_off),
+            child: Icon(
+              _speechToText.isNotListening ? Icons.mic : Icons.mic_off,
+            ),
           ),
         ],
       ),
